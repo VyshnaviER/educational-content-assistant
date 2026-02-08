@@ -1,0 +1,30 @@
+Computer Science Basics
+
+Programming Fundamentals:
+
+Variables: Containers for storing data values.
+Example: x = 5, name = "John"
+
+Functions: Reusable blocks of code.
+Example: def greet(name): return "Hello " + name
+
+Loops: Repeat actions multiple times.
+Example: for i in range(5): print(i)
+
+Conditionals: Make decisions in code.
+Example: if x > 0: print("Positive")
+
+Data Structures:
+- Arrays/Lists: Ordered collections
+- Dictionaries: Key-value pairs
+- Sets: Unique elements
+
+Algorithms:
+Step-by-step procedures for solving problems.
+Examples: Sorting, Searching, Pathfinding
+
+Career Paths:
+1. Software Development
+2. Data Science
+3. Cybersecurity
+4. AI/ML Engineering

@@ -1,0 +1,17 @@
+COMPUTER SCIENCE INTRODUCTION
+Computer Science is the study of computers and computational systems.
+
+PROGRAMMING BASICS:
+Programming involves writing instructions for computers to execute tasks.
+
+KEY PROGRAMMING CONCEPTS:
+- Variables: Store data values
+- Functions: Reusable code blocks
+- Algorithms: Step-by-step procedures
+- Data Structures: Organize and store data
+
+CAREERS IN COMPUTER SCIENCE:
+1. Software Development
+2. Data Science
+3. Cybersecurity
+4. Artificial Intelligence
