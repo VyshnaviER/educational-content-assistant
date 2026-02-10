@@ -51,8 +51,9 @@ cd educational-content-assistant
 pip install -r requirements.txt
 
 Step 2: Install Ollama (Local AI Engine)
-# Download from: https://ollama.com/download
-# Then verify installation:
+
+### Download from: https://ollama.com/download
+### Then verify installation:
 ollama --version  # Should show version number
 
 Step 3: Launch AI Services
