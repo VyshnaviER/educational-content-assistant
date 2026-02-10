@@ -237,8 +237,10 @@ pip install -r requirements.txt
 
 ### 5. Submit pull request
 
-## Support
-Live App: http://localhost:8501 (when running)
+## 📞Support
+- Live App: http://localhost:8501 (when running)
+- Issue Tracking: GitHub Issues
+- Documentation Portal: 
 
 ### Common Questions
 Q: Why do I need Ollama?
@@ -250,7 +252,7 @@ A: Currently optimized for local use. Cloud adaptation requires code changes.
 Q: What are the system requirements?
 A: 8GB RAM minimum, 16GB recommended for best AI performance.
 
-## Acknowledgments
+## 🙏Acknowledgments
 Built with amazing open-source tools:
 
 . Streamlit - Web application framework
