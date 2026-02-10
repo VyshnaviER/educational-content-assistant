@@ -1,8 +1,8 @@
-# Educational Content Assistant
+# Educational Content Assistant🎓
 A Retrieval-Augmented Generation (RAG) system designed for educational content delivery and personalized learning.
 A comprehensive RAG-based educational assistant with local AI capabilities – 100% free, no API costs!
 
-## Features
+## Features✨
 ## AI Tutor🤖 
 Ask any educational question
 
@@ -73,7 +73,7 @@ The project includes pre-loaded educational content:
 
 <img width="638" height="199" alt="image" src="https://github.com/user-attachments/assets/6b5d5217-59cc-4a98-85fe-dc560ef6b223" />
 
-## Project Architecture
+## 📁Project Architecture(Based on repo)
 <img width="573" height="356" alt="image" src="https://github.com/user-attachments/assets/cbd9aad4-3d93-420e-b0d8-c54fb8cbbaf6" />
 
 
@@ -230,4 +230,4 @@ Built with amazing open-source tools:
 
 
 ## Happy Learning! 🎓
-### Empowering education with local AI - no subscriptions, no limits, complete privacy.
+### "Empowering education with local AI - no subscriptions, no limits, complete privacy🔒."
