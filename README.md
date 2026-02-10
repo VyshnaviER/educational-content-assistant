@@ -131,15 +131,15 @@ streamlit run src/streamlit_app.py --server.port 8502
 
 
 ## Verification Checklist
-. ollama serve running in Terminal 1
+.  ollama serve running in Terminal 1
 
-. gemma:2b appears in ollama list
+.  gemma:2b appears in ollama list
 
-. curl http://localhost:11434/api/tags returns model list
+.  curl http://localhost:11434/api/tags returns model list
 
-. Streamlit app loads without errors
+.  Streamlit app loads without errors
 
-. AI Status shows "✅ Running"
+.  AI Status shows "✅ Running"
 
 ## Deployment Options
 ### Option 1: Local Development (Recommended)
