@@ -38,12 +38,12 @@ Relevance scoring and source tracking
 Expandable results for detailed viewing
 
 # Quick Start (5-Minute Setup)
-Prerequisites
+## Prerequisites
 Python 3.9+
 Git
 Ollama (for local AI)
 
-###Step 1: Clone & Setup
+### Step 1: Clone & Setup
 git clone https://github.com/VyshnaviER/educational-content-assistant.git
 cd educational-content-assistant
 pip install -r requirements.txt
@@ -55,39 +55,27 @@ pip install -r requirements.txt
 ollama --version  # Should show version number
 
 ### Step 3: Launch AI Services
-### TERMINAL 1: Start Ollama (keep running!)
+TERMINAL 1: Start Ollama (keep running!)
 ollama serve
 
-### TERMINAL 2: Download AI model
+TERMINAL 2: Download AI model
 ollama pull gemma:2b
 
 ### Step 4: Start Application
-### TERMINAL 3: Launch the web app
+TERMINAL 3: Launch the web app
 streamlit run src/streamlit_app.py
 
 ### Step 5: Access Dashboard
 Open your browser to: http://localhost:8501
 
-📖### Try Sample Courses
+### Try Sample Courses
 The project includes pre-loaded educational content:
 
 <img width="638" height="199" alt="image" src="https://github.com/user-attachments/assets/6b5d5217-59cc-4a98-85fe-dc560ef6b223" />
 
 ## Project Architecture
-educational-content-assistant/
-├── src/
-│   ├── streamlit_app.py          # Web interface (Streamlit)
-│   ├── generation/
-│   │   └── llm_manager.py        # AI model orchestration
-│   ├── retrieval/
-│   │   └── vector_store.py       # RAG & semantic search
-│   └── utils/
-│       └── file_processor.py     # PDF/text processing
-├── courses/                      # Sample educational content
-│   ├── biology/
-│   └── computer_science/
-├── requirements.txt              # Python dependencies
-└── README.md                     # This documentation
+<img width="573" height="356" alt="image" src="https://github.com/user-attachments/assets/cbd9aad4-3d93-420e-b0d8-c54fb8cbbaf6" />
+
 
 ## Configuration
 ### Local AI Setup
@@ -115,19 +103,31 @@ ollama pull llama2:7b
 4.Course Search: Type keywords → Browse results → Expand details
 
 ### Quick Testing
-.Try AI Tutor: Ask "Explain photosynthesis in simple terms"
+. Try AI Tutor: Ask "Explain photosynthesis in simple terms"
 
-.Test Quiz Generator: Topic "Python basics", 5 questions
+. Test Quiz Generator: Topic "Python basics", 5 questions
 
-.Explore Course Search: Search "neural networks" in Computer Science
+. Explore Course Search: Search "neural networks" in Computer Science
 
-🐛 Troubleshooting
-Issue	                                                          Solution
-1.AI Tutor requires Ollama        -       ollama serve must be running in separate terminal
-2.Model not found	                -       Run ollama pull gemma:2b
-3.Slow AI responses	              -       Try smaller model: ollama pull qwen2.5:0.5b
-4.Port 8501 in use	              -       streamlit run src/streamlit_app.py --server.port8502
-5.Import errors	                  -       pip install -r requirements.txt --upgrade
+## Troubleshooting
+### Issue: AI Tutor shows "Not running" or requires Ollama
+Solution: Ensure ollama serve is running in a separate terminal before starting the app.
+
+### Issue: "Model not found" error
+Solution: Verify the model is downloaded:
+ollama list  # Should show "gemma:2b"
+
+### Issue: App starts but AI features don't work
+Solution: Check Ollama is accessible:
+curl http://localhost:11434/api/tags  # Should return model list
+
+### Issue: Slow responses from AI Tutor
+Solution: Try a smaller model:
+ollama pull qwen2.5:0.5b  # Faster but less capable
+
+### Issue: Port 8501 already in use
+Solution: Run Streamlit on a different port:
+streamlit run src/streamlit_app.py --server.port 8502
 
 
 ## Verification Checklist
@@ -190,15 +190,15 @@ Modify llm_manager.py to use cloud endpoints
  . Multi-language support
 
 ## Development Setup
-#### 1. Fork and clone repository
-#### 2. Create virtual environment
+### 1. Fork and clone repository
+### 2. Create virtual environment
 python -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 
-#### 3. Install dev dependencies
+### 3. Install dev dependencies
 pip install -r requirements.txt
 
-#### 4. Make changes and test
+### 4. Make changes and test
 #### 5. Submit pull request
 
 ## Support
@@ -229,5 +229,5 @@ Built with amazing open-source tools:
 
 
 
-                                    ###  Happy Learning! 🎓
-## Empowering education with local AI - no subscriptions, no limits, complete privacy.
+##Happy Learning! 🎓
+### Empowering education with local AI - no subscriptions, no limits, complete privacy.
