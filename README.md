@@ -54,21 +54,29 @@ pip install -r requirements.txt
 ### Step 2: Install Ollama (Local AI Engine)
 
  Download from: https://ollama.com/download
+ 
 ### Then verify installation:
+
 ollama --version  # Should show version number
 
 ### Step 3: Launch AI Services
+
 TERMINAL 1: Start Ollama (keep running!)
+
 ollama serve
 
 TERMINAL 2: Download AI model
+
 ollama pull gemma:2b
 
 ### Step 4: Start Application
+
 TERMINAL 3: Launch the web app
+
 streamlit run src/streamlit_app.py
 
 ### Step 5: Access Dashboard
+
 Open your browser to: http://localhost:8501
 
 ### Try Sample Courses
@@ -79,25 +87,32 @@ The project includes pre-loaded educational content:
 ## 📁Project Structure
 <img width="573" height="356" alt="image" src="https://github.com/user-attachments/assets/cbd9aad4-3d93-420e-b0d8-c54fb8cbbaf6" />
 
+
 ## Component Architecture
-<img width="500" height="462" alt="image" src="https://github.com/user-attachments/assets/d343d730-b913-49e1-9f2e-e4f571049a96" />
+<img width="639" height="567" alt="image" src="https://github.com/user-attachments/assets/71ae1e62-0d6a-4f0b-9fd8-e4b9d4ee2444" />
+
 
 ## Data Flow Structure
-<img width="455" height="489" alt="image" src="https://github.com/user-attachments/assets/e5da2ea1-3f4b-4966-a842-a875259ef51a" />
+<img width="597" height="586" alt="image" src="https://github.com/user-attachments/assets/a5c0bd99-983f-4c3f-add5-1a3b3e60cd49" />
+
 
 ## Technology Stack
 <img width="885" height="334" alt="image" src="https://github.com/user-attachments/assets/d42b2091-10aa-4419-9683-8bd32a9610e3" />
 
+
 ## Configuration
 ### Local AI Setup
 #### Verify Ollama is running (in a separate terminal)
+
 curl http://localhost:11434/api/tags
 
-#### Expected response:
-#### {"models":[{"name":"gemma:2b","modified_at":"2024-..."}]}
+### Expected response:
+
+ {"models":[{"name":"gemma:2b","modified_at":"2024-..."}]}
 
 ## Optional: Alternative Models
 ### Smaller, faster model (less capable)
+
 ollama pull qwen2.5:0.5b
 
 ### Larger, more capable model (requires more RAM)
@@ -105,6 +120,7 @@ ollama pull llama2:7b
 
 ## Using the Application
 ### Web Dashboard (http://localhost:8501)
+
 1.AI Tutor: Select from sidebar → Ask question → Choose difficulty
 
 2.PDF Summarizer: Upload PDF → Adjust focus → Get summary
@@ -114,6 +130,7 @@ ollama pull llama2:7b
 4.Course Search: Type keywords → Browse results → Expand details
 
 ### Quick Testing
+
 . Try AI Tutor: Ask "Explain photosynthesis in simple terms"
 
 . Test Quiz Generator: Topic "Python basics", 5 questions
@@ -130,14 +147,17 @@ ollama list  # Should show "gemma:2b"
 
 ### Issue: App starts but AI features don't work
 Solution: Check Ollama is accessible:
+
 curl http://localhost:11434/api/tags  # Should return model list
 
 ### Issue: Slow responses from AI Tutor
 Solution: Try a smaller model:
+
 ollama pull qwen2.5:0.5b  # Faster but less capable
 
 ### Issue: Port 8501 already in use
 Solution: Run Streamlit on a different port:
+
 streamlit run src/streamlit_app.py --server.port 8502
 
 
@@ -151,6 +171,7 @@ streamlit run src/streamlit_app.py --server.port 8502
 .  Streamlit app loads without errors
 
 .  AI Status shows "✅ Running"
+
 
 ## Deployment Options
 ### Option 1: Local Development (Recommended)
@@ -203,14 +224,18 @@ Modify llm_manager.py to use cloud endpoints
 ## Development Setup
 ### 1. Fork and clone repository
 ### 2. Create virtual environment
+
 python -m venv .venv
+
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 
 ### 3. Install dev dependencies
+
 pip install -r requirements.txt
 
 ### 4. Make changes and test
-#### 5. Submit pull request
+
+### 5. Submit pull request
 
 ## Support
 Live App: http://localhost:8501 (when running)
