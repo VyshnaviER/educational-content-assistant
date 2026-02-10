@@ -1,3 +1,4 @@
+
 import streamlit as st
 import os
 import tempfile
@@ -6,7 +7,7 @@ st.set_page_config(page_title="ER Learning Assistant Pro", layout="wide")
 st.title("🎓 ER Learning Assistant Pro")
 
 # ==================== COURSE DATABASE ====================
-COURSE_DB = {
+OURSE_DB = {
     "biology": {
         "beginner": [
             "Cells are basic unit of life",
@@ -78,6 +79,16 @@ COURSE_DB = {
     }
 }
 
+try:
+    from educational_assistant import KnowledgeBase
+    kb = KnowledgeBase()
+    kb.load_courses()
+    COURSES_LOADED = True
+except Exception as e:
+    st.error(f"Course Error: {e}")
+    kb = None
+    COURSES_LOADED = False
+
 # ==================== OLLAMA CHECK ====================
 try:
     import ollama
@@ -89,6 +100,18 @@ try:
         OLLAMA_RUNNING = False
 except ImportError:
     OLLAMA_AVAILABLE = OLLAMA_RUNNING = False
+
+# ==================== FIX: GET COURSES FROM KNOWLEDGEBASE ====================
+if kb and hasattr(kb, 'courses'):
+    COURSE_DB = kb.courses
+elif kb and hasattr(kb, 'course_db'):
+    COURSE_DB = kb.course_db
+elif kb and hasattr(kb, 'documents'):
+    COURSE_DB = kb.documents
+elif kb and hasattr(kb, 'loaded_courses'):
+    COURSE_DB = kb.loaded_courses
+else:
+    COURSE_DB = []  # Fallback if no courses found
 
 # ==================== SIDEBAR ====================
 st.sidebar.header("⚙️ Settings")
@@ -105,8 +128,35 @@ tab1, tab2, tab3, tab4 = st.tabs([
 
 # ==================== TAB 1: SMART COURSE SEARCH ====================
 with tab1:
+    st.subheader("🔍 Search Course Materials")
     st.subheader("🔍 Smart Course Search")
-    
+
+    if not COURSES_LOADED:
+        st.warning("Course materials not loaded")
+    else:
+        question = st.text_input("Search in your courses:", key="search_q")
+        
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            if st.button("🔎 Search Courses", use_container_width=True) and question:
+                with st.spinner("Searching..."):
+                    results = kb.search(question, max_results=5)
+                    if results:
+                        st.subheader(f"📚 Found {len(results)} matches:")
+                        for i, r in enumerate(results, 1):
+                            with st.expander(f"Match {i} (Relevance: {r['score']}/5)"):
+                                st.write(r['content'])
+                                st.caption(f"Source: {r['source']}")
+                    else:
+                        st.warning("No matches found.")
+        
+        with col2:
+            if st.button("📋 Show All Courses", use_container_width=True):
+                st.subheader("📚 All Available Courses:")
+                if kb.data:
+                    sources = set(r['source'] for r in kb.data)
+                    for source in sources:
+                        st.write(f"• {source}")
     col1, col2 = st.columns(2)
     with col1:
         course = st.selectbox(
@@ -237,237 +287,524 @@ with tab2:
 # ==================== TAB 3: PDF SUMMARIZER PRO ====================
 with tab3:
     st.subheader("📄 PDF Summarizer Pro")
-    
-    uploaded_file = st.file_uploader("📤 Upload PDF File", type=["pdf"])
-    
+    st.write("Upload a PDF or textbook to get AI-powered analysis and summaries")
+
+    uploaded_file = st.file_uploader("📤 Upload PDF File", type=["pdf", "txt"], 
+                                     help="Supports PDF and text files up to 10MB")
+
     if uploaded_file is not None:
         # Save file
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_file:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=f'.{uploaded_file.name.split(".")[-1]}') as tmp_file:
             tmp_file.write(uploaded_file.getvalue())
             tmp_path = tmp_file.name
-        
+
         # File info
         st.success(f"✅ Uploaded: **{uploaded_file.name}**")
+        
         col1, col2, col3 = st.columns(3)
         with col1:
             st.metric("Size", f"{uploaded_file.size / 1024:.1f} KB")
         with col2:
-            st.metric("Type", "PDF")
+            file_type = uploaded_file.name.split('.')[-1].upper()
+            st.metric("Type", file_type)
         with col3:
-            st.metric("Status", "Ready")
-        
-        # Summarization options
-        st.markdown("---")
-        st.subheader("📊 Summarization Options")
-        
-        summary_type = st.radio(
-            "Choose summary type:",
-            ["📋 Key Points", "📝 Short Summary", "📄 Detailed Report", "🤖 AI Analysis"],
-            horizontal=True
-        )
-        
-        length = st.slider("Summary length:", 1, 10, 5)
-        
-        if st.button("🚀 Generate Summary", type="primary"):
-            with st.spinner(f"Creating {summary_type}..."):
-                # Simulated content based on options
-                if summary_type == "📋 Key Points":
-                    st.markdown("### 📋 Key Points Summary")
-                    st.write(f"**PDF:** {uploaded_file.name}")
-                    st.write(f"**Length:** {length} key points")
-                    st.write("---")
-                    for i in range(1, length + 1):
-                        st.write(f"{i}. Important point about the document content")
-                
-                elif summary_type == "📝 Short Summary":
-                    st.markdown("### 📝 Short Summary")
-                    st.write(f"This PDF '{uploaded_file.name}' appears to contain educational material.")
-                    st.write(f"The document discusses topics relevant to learning and study.")
-                    st.write(f"Key themes include information presentation and knowledge sharing.")
-                    st.write(f"Useful for students and educators seeking reference material.")
-                
-                elif summary_type == "📄 Detailed Report":
-                    st.markdown("### 📄 Detailed Report")
-                    st.write("**Document Analysis Report**")
-                    st.write(f"**Filename:** {uploaded_file.name}")
-                    st.write(f"**File Size:** {uploaded_file.size} bytes")
-                    st.write(f"**Estimated Pages:** {uploaded_file.size // 5000 + 1}")
-                    st.write(f"**Content Type:** Educational/Instructional")
-                    st.write(f"**Complexity:** Medium")
-                    st.write(f"**Target Audience:** Students, Educators")
-                    st.write(f"**Primary Topics:** Learning material, Study content")
-                
-                elif summary_type == "🤖 AI Analysis" and OLLAMA_RUNNING:
-                    st.markdown("### 🤖 AI Analysis")
-                    with st.spinner("AI analyzing PDF..."):
-                        try:
-                            ai_prompt = f"""
-                            Analyze this PDF document named '{uploaded_file.name}'.
-                            Provide: 
-                            1. Likely subject/topic
-                            2. Key themes
-                            3. Educational value
-                            4. {length} main points
-                            """
-                            response = ollama.generate(
-                                model="gemma:2b",
-                                prompt=ai_prompt,
-                                options={'num_predict': 400}
-                            )
-                            st.write("**AI Analysis:**")
-                            st.write(response['response'])
-                            
-                            # Ask follow-up
-                            if st.button("💡 Ask AI about this PDF"):
-                                question = st.text_input("What would you like to know about this PDF?")
-                                if question:
-                                    q_resp = ollama.generate(
-                                        model="gemma:2b",
-                                        prompt=f"Based on PDF '{uploaded_file.name}', answer: {question}",
-                                        options={'num_predict': 300}
-                                    )
-                                    st.write("**AI:**", q_resp['response'])
-                        except Exception as e:
-                            st.error(f"AI Analysis Error: {e}")
-        
-        # Cleanup
-        os.unlink(tmp_path)
-    else:
-        st.info("👆 Upload a PDF document to use the summarizer")
-        st.markdown("""
-        **Available Features:**
-        - 📋 **Key Points** - Bullet point summary
-        - 📝 **Short Summary** - Brief overview
-        - 📄 **Detailed Report** - Comprehensive analysis
-        - 🤖 **AI Analysis** - Intelligent insights
-        """)
+            st.metric("Pages", "Processing...")
 
+        st.markdown("---")
+        
+        # Processing options
+        col1, col2 = st.columns(2)
+        with col1:
+            summary_type = st.selectbox(
+                "Summary Format:",
+                ["Key Points", "Detailed Summary", "Chapter-wise", "Study Guide"],
+                help="Choose how you want the content summarized"
+            )
+        
+        with col2:
+            detail_level = st.slider(
+                "Detail Level:", 
+                1, 10, 5,
+                help="1 = Very brief, 10 = Very detailed"
+            )
+
+        # Advanced options
+        with st.expander("⚙️ Advanced Options"):
+            focus_areas = st.multiselect(
+                "Focus on specific aspects:",
+                ["Concepts & Definitions", "Examples & Applications", 
+                 "Formulas & Equations", "Key Takeaways", "Practice Problems"],
+                default=["Concepts & Definitions", "Key Takeaways"]
+            )
+            
+            include_examples = st.checkbox("Include examples", value=True)
+            target_audience = st.select_slider(
+                "Target Audience:",
+                options=["Beginner", "Intermediate", "Advanced", "Expert"]
+            )
+
+        if st.button("🚀 Process & Summarize", type="primary"):
+            with st.spinner(f"Reading {uploaded_file.name}..."):
+                try:
+                    extracted_text = ""
+                    
+                    # Handle different file types
+                    if uploaded_file.type == "application/pdf" or uploaded_file.name.endswith('.pdf'):
+                        # Extract text from PDF
+                        try:
+                            import PyPDF2
+                            with open(tmp_path, 'rb') as file:
+                                pdf_reader = PyPDF2.PdfReader(file)
+                                num_pages = len(pdf_reader.pages)
+                                
+                                # Update page count
+                                col3.metric("Pages", num_pages)
+                                
+                                # Extract text from each page
+                                for page_num in range(min(num_pages, 50)):  # Limit to 50 pages for performance
+                                    page = pdf_reader.pages[page_num]
+                                    text = page.extract_text()
+                                    if text:
+                                        extracted_text += f"\n--- Page {page_num + 1} ---\n{text}\n"
+                                
+                                if num_pages > 50:
+                                    st.warning(f"Processed first 50 of {num_pages} pages for performance.")
+                        
+                        except ImportError:
+                            st.error("PDF processing requires PyPDF2. Install: `pip install PyPDF2`")
+                            st.stop()
+                    
+                    elif uploaded_file.type == "text/plain" or uploaded_file.name.endswith('.txt'):
+                        # Read text file
+                        with open(tmp_path, 'r', encoding='utf-8') as file:
+                            extracted_text = file.read()
+                    
+                    # Show extracted content preview
+                    if extracted_text:
+                        char_count = len(extracted_text)
+                        word_count = len(extracted_text.split())
+                        
+                        st.markdown("---")
+                        col1, col2, col3 = st.columns(3)
+                        with col1:
+                            st.metric("Characters", f"{char_count:,}")
+                        with col2:
+                            st.metric("Words", f"{word_count:,}")
+                        with col3:
+                            st.metric("Estimated Pages", f"{word_count//500 + 1}")
+                        
+                        # Show preview
+                        with st.expander("📖 Preview Extracted Content (First 1000 chars)"):
+                            st.text(extracted_text[:1000] + "..." if len(extracted_text) > 1000 else extracted_text)
+                        
+                        # AI Analysis and Summarization
+                        if OLLAMA_RUNNING:
+                            st.markdown("### 🤖 AI Analysis & Summary")
+                            
+                            with st.spinner("Generating AI summary..."):
+                                try:
+                                    # Create summary prompt
+                                    summary_prompt = f"""
+                                    Analyze this educational content and provide a {summary_type.lower()} summary.
+                                    
+                                    CONTENT TYPE: {file_type} file
+                                    TARGET AUDIENCE: {target_audience} level
+                                    DETAIL LEVEL: {detail_level}/10
+                                    FOCUS AREAS: {', '.join(focus_areas)}
+                                    INCLUDE EXAMPLES: {'Yes' if include_examples else 'No'}
+                                    
+                                    CONTENT (first 4000 chars):
+                                    {extracted_text[:4000]}
+                                    
+                                    Please provide:
+                                    1. **Main Topic/Subject**
+                                    2. **Key Concepts** (bullet points)
+                                    3. **{summary_type} Summary**
+                                    4. **Study Recommendations**
+                                    
+                                    Format the response clearly for educational purposes.
+                                    """
+                                    
+                                    response = ollama.generate(
+                                        model="gemma:2b",
+                                        prompt=summary_prompt,
+                                        options={'num_predict': 1000}
+                                    )
+                                    
+                                    # Display AI summary
+                                    st.markdown("### 📝 Generated Summary")
+                                    st.markdown(response['response'])
+                                    
+                                    # Additional features
+                                    st.markdown("---")
+                                    col1, col2 = st.columns(2)
+                                    
+                                    with col1:
+                                        if st.button("🧠 Generate Study Questions"):
+                                            with st.spinner("Creating study questions..."):
+                                                question_prompt = f"""
+                                                Based on this content, create 5 study questions:
+                                                
+                                                Content summary: {response['response'][:500]}
+                                                
+                                                Create questions suitable for {target_audience} students.
+                                                Include multiple choice questions with answers.
+                                                """
+                                                
+                                                questions_resp = ollama.generate(
+                                                    model="gemma:2b",
+                                                    prompt=question_prompt,
+                                                    options={'num_predict': 500}
+                                                )
+                                                st.markdown("### ❓ Study Questions")
+                                                st.markdown(questions_resp['response'])
+                                    
+                                    with col2:
+                                        if st.button("📚 Create Flashcards"):
+                                            with st.spinner("Generating flashcards..."):
+                                                flashcard_prompt = f"""
+                                                Create 10 flashcards from this content:
+                                                
+                                                {response['response'][:300]}
+                                                
+                                                Format: Front (Question) | Back (Answer)
+                                                Keep terms and definitions concise.
+                                                """
+                                                
+                                                flashcards = ollama.generate(
+                                                    model="gemma:2b",
+                                                    prompt=flashcard_prompt,
+                                                    options={'num_predict': 400}
+                                                )
+                                                st.markdown("### 🗂️ Flashcards")
+                                                st.markdown(flashcards['response'])
+                                    
+                                    # Download options
+                                    st.markdown("---")
+                                    st.subheader("📥 Download Options")
+                                    
+                                    col1, col2 = st.columns(2)
+                                    with col1:
+                                        # Add datetime import at top of file first
+                                        from datetime import datetime
+                                        if st.button("💾 Save Summary as Text"):
+                                            # Create downloadable text file
+                                            summary_text = f"""
+                                            PDF Summary Report
+                                            ==================
+                                            File: {uploaded_file.name}
+                                            Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}
+                                            
+                                            {response['response']}
+                                            """
+                                            
+                                            st.download_button(
+                                                label="Download Text Summary",
+                                                data=summary_text,
+                                                file_name=f"summary_{uploaded_file.name.split('.')[0]}.txt",
+                                                mime="text/plain"
+                                            )
+                                    
+                                    st.success("✅ Analysis complete!")
+                                    
+                                except Exception as ai_error:
+                                    st.error(f"AI Analysis Error: {ai_error}")
+                        else:
+                            st.warning("🤖 Ollama not running. Enable AI for summarization features.")
+                            st.info("Showing extracted text only:")
+                            st.text_area("📄 Extracted Content", extracted_text[:3000], height=300)
+                    
+                    else:
+                        st.error("⚠️ Could not extract text from the file.")
+                    
+                    # Cleanup
+                    os.unlink(tmp_path)
+                    
+                except Exception as e:
+                    st.error(f"❌ Processing Error: {e}")
+                    import traceback
+                    st.code(traceback.format_exc())
+    else:
+        st.info("👆 Upload a PDF or text file to begin analysis")
+        
+        # Show sample analysis
+        with st.expander("📋 See Sample Analysis"):
+            st.markdown("""
+            **Sample PDF Analysis:**
+            
+            **Main Topic:** Introduction to Python Programming
+            
+            **Key Concepts:**
+            - Variables and data types
+            - Control structures (if/else, loops)
+            - Functions and modules
+            - File handling
+            
+            **Summary:**
+            This introductory chapter covers Python basics suitable for beginners...
+            
+            **Study Recommendations:**
+            1. Practice variable declaration
+            2. Write simple programs
+            3. Review control flow examples
+            """)
+# ==================== TAB 4: QUIZ GENERATOR ====================
+# ==================== HELPER FUNCTIONS ====================
+def parse_quiz_questions(quiz_text, num_questions):
+    """Parse quiz text into structured questions - SIMPLIFIED VERSION"""
+    questions = []
+    lines = quiz_text.strip().split('\n')
+    
+    current_q = {}
+    in_question = False
+    
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+            
+        # Start of a new question
+        if line.lower().startswith('q') and ('.' in line or ':' in line):
+            if current_q and 'question' in current_q:
+                questions.append(current_q)
+                if len(questions) >= num_questions:
+                    break
+            
+            # Extract question number and text
+            if '.' in line:
+                parts = line.split('.', 1)
+                current_q = {
+                    'question': parts[1].strip() if len(parts) > 1 else line,
+                    'options': [],
+                    'correct_answer': 'A',  # Default
+                    'explanation': 'No explanation provided'
+                }
+            elif ':' in line:
+                parts = line.split(':', 1)
+                current_q = {
+                    'question': parts[1].strip() if len(parts) > 1 else line,
+                    'options': [],
+                    'correct_answer': 'A',
+                    'explanation': 'No explanation provided'
+                }
+            in_question = True
+            
+        # Options detection
+        elif in_question and ('option' in line.lower() or 'choice' in line.lower() or 
+                             line.startswith(('A)', 'B)', 'C)', 'D)', 'a)', 'b)', 'c)', 'd)'))):
+            if ':' in line and ('option' in line.lower() or 'choice' in line.lower()):
+                opts = line.split(':', 1)[1].strip()
+                current_q['options'] = [opt.strip() for opt in opts.split(',')]
+            elif line.startswith(('A)', 'B)', 'C)', 'D)', 'a)', 'b)', 'c)', 'd)')):
+                current_q['options'].append(line)
+                
+        # Correct answer
+        elif in_question and ('correct' in line.lower() or 'answer:' in line.lower()):
+            if ':' in line:
+                current_q['correct_answer'] = line.split(':', 1)[1].strip().upper()
+            else:
+                current_q['correct_answer'] = line.upper()
+                
+        # Explanation
+        elif in_question and ('explanation:' in line.lower() or 'explain:' in line.lower()):
+            if ':' in line:
+                current_q['explanation'] = line.split(':', 1)[1].strip()
+    
+    # Add the last question
+    if current_q and 'question' in current_q and len(questions) < num_questions:
+        questions.append(current_q)
+    
+    # Fill in missing questions if needed
+    while len(questions) < num_questions:
+        questions.append({
+            'question': f"Question {len(questions) + 1} about the topic",
+            'options': ["A) Option 1", "B) Option 2", "C) Option 3", "D) Option 4"],
+            'correct_answer': "A",
+            'explanation': "This is a sample question."
+        })
+    
+    return questions[:num_questions]
 # ==================== TAB 4: QUIZ GENERATOR ====================
 with tab4:
     st.subheader("🎯 Quiz Generator")
     
-    col1, col2 = st.columns(2)
-    with col1:
-        topic = st.text_input(
-            "📚 Quiz Topic:",
-            placeholder="e.g., Cell Biology, Python Functions, Quantum Physics"
-        )
+    # Initialize session state
+    if 'quiz_generated' not in st.session_state:
+        st.session_state.quiz_generated = False
+    if 'current_quiz' not in st.session_state:
+        st.session_state.current_quiz = None
+    if 'user_answers' not in st.session_state:
+        st.session_state.user_answers = {}
+    if 'show_results' not in st.session_state:
+        st.session_state.show_results = False
+
+    # Quiz creation form
+    with st.form("quiz_creation"):
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            topic = st.text_input(
+                "📚 Quiz Topic:",
+                placeholder="e.g., Python, Cells, Gravity",
+                key="quiz_topic_input"
+            )
+        
+        with col2:
+            qtype = st.selectbox(
+                "🎮 Question Type:",
+                ["Multiple Choice", "True/False"],
+                key="quiz_type_select"
+            )
+        
+        col3, col4 = st.columns(2)
+        with col3:
+            num_q = st.slider("📊 Questions:", 1, 10, 5, key="num_q_slider")
+        
+        with col4:
+            difficulty = st.selectbox(
+                "🎯 Difficulty:",
+                ["Easy", "Medium", "Hard"],
+                key="difficulty_select"
+            )
+        
+        generate = st.form_submit_button("🚀 Generate Quiz", type="primary")
     
-    with col2:
-        quiz_type = st.selectbox(
-            "🎮 Quiz Type:",
-            ["Multiple Choice", "True/False", "Short Answer", "Mixed"]
-        )
-    
-    col3, col4 = st.columns(2)
-    with col3:
-        num_questions = st.slider("📊 Number of Questions:", 1, 20, 10)
-    
-    with col4:
-        difficulty = st.select_slider(
-            "🎯 Difficulty Level:",
-            options=["Easy", "Medium", "Hard", "Expert"]
-        )
-    
-    if st.button("🚀 Generate Quiz", type="primary") and topic and OLLAMA_RUNNING:
-        with st.spinner(f"Creating {difficulty.lower()} {quiz_type.lower()} quiz..."):
-            try:
-                prompt = f"""
-                Create a {difficulty.lower()} quiz about {topic}.
-                Quiz type: {quiz_type}
-                Number of questions: {num_questions}
-                
-                Format each question clearly.
-                For multiple choice: Q1. [question] A) [option] B) [option] C) [option] D) [option]
-                """
-                
-                response = ollama.generate(
-                    model="gemma:2b",
-                    prompt=prompt,
-                    options={'num_predict': 800}
-                )
-                
-                # Display quiz
-                st.markdown("---")
-                st.subheader(f"📝 {difficulty} Quiz: {topic}")
-                st.markdown(response['response'])
-                
-                # Answer section
-                st.markdown("---")
-                st.subheader("✏️ Your Answers")
-                
-                answers = {}
-                for i in range(1, num_questions + 1):
-                    if quiz_type == "Multiple Choice":
-                        ans = st.text_input(
-                            f"Q{i} Answer (A/B/C/D):",
-                            key=f"mcq_{topic}_{i}",
-                            max_chars=1,
-                            placeholder="A"
-                        )
-                    elif quiz_type == "True/False":
-                        ans = st.selectbox(
-                            f"Q{i} Answer:",
-                            ["", "True", "False"],
-                            key=f"tf_{topic}_{i}"
-                        )
-                    else:
-                        ans = st.text_input(
-                            f"Q{i} Answer:",
-                            key=f"sa_{topic}_{i}",
-                            placeholder="Type your answer..."
-                        )
+    # Generate quiz
+    if generate and topic:
+        if not OLLAMA_RUNNING:
+            st.warning("⚠️ Ollama not running! Start it in AI Tutor tab first.")
+        else:
+            with st.spinner(f"Creating {difficulty} quiz about {topic}..."):
+                try:
+                    prompt = f"Create a {difficulty.lower()} {qtype.lower()} quiz about {topic} with {num_q} questions. Include questions, options, correct answers, and explanations."
                     
-                    if ans:
-                        answers[i] = ans
-                
-                # Submit and grade
-                if st.button("📤 Submit Quiz", key=f"submit_quiz_{topic}"):
-                    if answers:
-                        # Enhanced grading simulation
-                        st.success(f"✅ Quiz Submitted! You answered {len(answers)}/{num_questions} questions.")
+                    response = ollama.generate(
+                        model="gemma:2b",
+                        prompt=prompt,
+                        options={'num_predict': 500}
+                    )
+                    
+                    # Parse questions
+                    questions = parse_quiz_questions(response['response'], num_q)
+                    
+                    # Store in session state
+                    st.session_state.current_quiz = {
+                        'topic': topic,
+                        'type': qtype,
+                        'difficulty': difficulty,
+                        'questions': questions
+                    }
+                    
+                    st.session_state.quiz_generated = True
+                    st.session_state.user_answers = {}
+                    st.session_state.show_results = False
+                    
+                    st.success(f"✅ Quiz generated! Answer the questions below.")
+                    
+                except Exception as e:
+                    st.error(f"Error: {str(e)}")
+    
+    # Display quiz if generated
+    if st.session_state.quiz_generated and st.session_state.current_quiz:
+        quiz = st.session_state.current_quiz
+        
+        st.markdown("---")
+        st.subheader(f"📝 {quiz['difficulty']} Quiz: {quiz['topic']}")
+        
+        # Display questions
+        for i, q in enumerate(quiz['questions']):
+            st.markdown(f"**Q{i+1}. {q['question']}**")
+            
+            # Show options
+            if quiz['type'] == "Multiple Choice" and q.get('options'):
+                for opt in q['options']:
+                    st.write(f"  {opt}")
+            
+            # Answer input - Using radio to prevent refresh
+            if quiz['type'] == "Multiple Choice":
+                ans = st.radio(
+                    f"Answer for Q{i+1}:",
+                    ["Select...", "A", "B", "C", "D"],
+                    key=f"ans_{i}",
+                    horizontal=True,
+                    index=0
+                )
+                if ans != "Select...":
+                    st.session_state.user_answers[i] = ans
+            else:  # True/False
+                ans = st.radio(
+                    f"Answer for Q{i+1}:",
+                    ["Select...", "True", "False"],
+                    key=f"ans_{i}",
+                    horizontal=True,
+                    index=0
+                )
+                if ans != "Select...":
+                    st.session_state.user_answers[i] = ans
+            
+            st.markdown("---")
+        
+        # Submit button
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            if st.button("📤 Submit Quiz", type="primary", key="submit_btn"):
+                if st.session_state.user_answers:
+                    # Calculate score
+                    score = 0
+                    total = len(quiz['questions'])
+                    
+                    for i, q in enumerate(quiz['questions']):
+                        user_ans = st.session_state.user_answers.get(i, "")
+                        correct_ans = q.get('correct_answer', 'A')
                         
-                        # Show results in expander
-                        with st.expander("📊 View Detailed Results", expanded=True):
-                            # Simulated correct answers
-                            correct_answers = {}
-                            for i in range(1, num_questions + 1):
-                                if quiz_type == "Multiple Choice":
-                                    correct_answers[i] = ["A", "B", "C", "D"][i % 4]
-                                elif quiz_type == "True/False":
-                                    correct_answers[i] = ["True", "False"][i % 2]
-                                else:
-                                    correct_answers[i] = f"Sample answer for Q{i}"
-                            
-                            # Calculate score
-                            score = 0
-                            for q_num, user_ans in answers.items():
-                                correct = correct_answers.get(q_num, "N/A")
-                                is_correct = (str(user_ans).strip().lower() == str(correct).strip().lower())
-                                if is_correct:
-                                    score += 1
-                            
-                            # Display
-                            st.write(f"**Your Score:** {score}/{num_questions}")
-                            st.write(f"**Percentage:** {(score/num_questions)*100:.1f}%")
-                            
-                            # Performance message
-                            if score == num_questions:
-                                st.balloons()
-                                st.success("🎉 Perfect score! Excellent work!")
-                            elif score >= num_questions * 0.7:
-                                st.success("👍 Good job! Well done!")
-                            elif score >= num_questions * 0.5:
-                                st.info("📚 Keep practicing! You're getting there.")
-                            else:
-                                st.warning("📖 Review the material and try again.")
-                    else:
-                        st.warning("⚠️ Please enter answers before submitting.")
-                        
-            except Exception as e:
-                st.error(f"Quiz Generation Error: {e}")
-    elif not OLLAMA_RUNNING:
-        st.warning("⚠️ Start Ollama in AI Tutor tab to generate quizzes.")
+                        if str(user_ans).upper() == str(correct_ans).upper():
+                            score += 1
+                    
+                    # Store results
+                    st.session_state.quiz_results = {
+                        'score': score,
+                        'total': total,
+                        'percentage': (score/total)*100
+                    }
+                    st.session_state.show_results = True
+                    st.success(f"✅ Submitted! Score: {score}/{total}")
+                else:
+                    st.warning("⚠️ Please answer at least one question!")
+        
+        # New quiz button
+        if st.button("🔄 New Quiz", key="new_quiz"):
+            st.session_state.quiz_generated = False
+            st.session_state.current_quiz = None
+            st.session_state.user_answers = {}
+            st.session_state.show_results = False
+            st.rerun()
+    
+    # Show results
+    if st.session_state.get('show_results') and st.session_state.get('quiz_results'):
+        results = st.session_state.quiz_results
+        
+        st.markdown("---")
+        st.subheader("📊 Your Results")
+        
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Score", f"{results['score']}/{results['total']}")
+        with col2:
+            st.metric("Percentage", f"{results['percentage']:.1f}%")
+        with col3:
+            grade = "A+" if results['percentage'] >= 90 else "A" if results['percentage'] >= 80 else "B" if results['percentage'] >= 70 else "C" if results['percentage'] >= 60 else "D"
+            st.metric("Grade", grade)
+        
+        # Performance message
+        if results['percentage'] == 100:
+            st.balloons()
+            st.success("🎉 Perfect! Excellent work!")
+        elif results['percentage'] >= 70:
+            st.success("👍 Good job! Well done!")
+        elif results['percentage'] >= 50:
+            st.info("📚 Keep practicing!")
+        else:
+            st.warning("📖 Review and try again.")
 
 # ==================== FOOTER ====================
 st.markdown("---")
