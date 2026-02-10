@@ -38,14 +38,17 @@ Relevance scoring and source tracking
 Expandable results for detailed viewing
 
 # Quick Start Deployment🚀 
+
 ## Prerequisites
-Python 3.9+
-Git
-Ollama (for local AI)
+- Python 3.9+
+- Git
+- Ollama (for local AI)
 
 ### Step 1: Clone & Setup
 git clone https://github.com/VyshnaviER/educational-content-assistant.git
+
 cd educational-content-assistant
+
 pip install -r requirements.txt
 
 ### Step 2: Install Ollama (Local AI Engine)
