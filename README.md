@@ -143,6 +143,7 @@ Solution: Ensure ollama serve is running in a separate terminal before starting 
 
 ### Issue: "Model not found" error
 Solution: Verify the model is downloaded:
+
 ollama list  # Should show "gemma:2b"
 
 ### Issue: App starts but AI features don't work
@@ -244,15 +245,19 @@ pip install -r requirements.txt
 
 ### Common Questions
 Q: Why do I need Ollama?
+
 A: This app uses 100% local AI for privacy and zero API costs.
 
 Q: Can I use cloud AI instead?
+
 A: Currently optimized for local use. Cloud adaptation requires code changes.
 
 Q: What are the system requirements?
+
 A: 8GB RAM minimum, 16GB recommended for best AI performance.
 
 ## 🙏Acknowledgments
+
 Built with amazing open-source tools:
 
 . Streamlit - Web application framework
