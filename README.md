@@ -73,9 +73,17 @@ The project includes pre-loaded educational content:
 
 <img width="638" height="199" alt="image" src="https://github.com/user-attachments/assets/6b5d5217-59cc-4a98-85fe-dc560ef6b223" />
 
-## 📁Project Architecture(Based on repo)
+## 📁Project Structure
 <img width="573" height="356" alt="image" src="https://github.com/user-attachments/assets/cbd9aad4-3d93-420e-b0d8-c54fb8cbbaf6" />
 
+## Component Architecture
+<img width="500" height="462" alt="image" src="https://github.com/user-attachments/assets/d343d730-b913-49e1-9f2e-e4f571049a96" />
+
+## Data Flow Structure
+<img width="455" height="489" alt="image" src="https://github.com/user-attachments/assets/e5da2ea1-3f4b-4966-a842-a875259ef51a" />
+
+## Technology Stack
+<img width="885" height="334" alt="image" src="https://github.com/user-attachments/assets/d42b2091-10aa-4419-9683-8bd32a9610e3" />
 
 ## Configuration
 ### Local AI Setup
@@ -153,7 +161,7 @@ Modify llm_manager.py to use cloud endpoints
 
 
 ## Testing the System
-### Basic Functionality Tes
+### Basic Functionality Test
 1. Start all services
    Terminal 1: ollama serve
    Terminal 2: streamlit run src/streamlit_app.py
