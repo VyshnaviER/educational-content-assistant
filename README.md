@@ -2,8 +2,8 @@
 A Retrieval-Augmented Generation (RAG) system designed for educational content delivery and personalized learning.
 A comprehensive RAG-based educational assistant with local AI capabilities – 100% free, no API costs!
 
-✨# Features
-🤖## AI Tutor
+## Features
+## AI Tutor
 Ask any educational question
 
 Local Ollama integration (Gemma:2b, Qwen models)
@@ -12,14 +12,14 @@ Multiple answer styles & difficulty levels
 
 100% private – all processing on your device
 
-📄## PDF Summarizer
+## PDF Summarizer
 Upload and extract text from PDFs
 
 AI-powered summaries with focus control
 
 Support for academic papers, textbooks, notes
 
-❓## Quiz Generator
+## Quiz Generator
 Create quizzes on any topic
 
 Multiple choice, true/false, short answer
@@ -28,7 +28,7 @@ Adjustable difficulty (Easy/Medium/Hard)
 
 Interactive quiz interface
 
-🔍## Course Search
+## Course Search
 Semantic search through course materials
 
 Sample courses: Biology & Computer Science
@@ -37,12 +37,10 @@ Relevance scoring and source tracking
 
 Expandable results for detailed viewing
 
-🚀# Quick Start (5-Minute Setup)
+# Quick Start (5-Minute Setup)
 Prerequisites
 Python 3.9+
-
 Git
-
 Ollama (for local AI)
 
 ###Step 1: Clone & Setup
