@@ -238,6 +238,14 @@ pip install -r requirements.txt
 
 ### 5. Submit pull request
 
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+**MIT © 2026 VyshnaviER**
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 ## 📞Support
 - Live App: http://localhost:8501 (when running)
 - Issue Tracking: GitHub Issues
