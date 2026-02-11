@@ -249,7 +249,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞Support
 - Live App: http://localhost:8501 (when running)
 - Issue Tracking: GitHub Issues
-- Documentation Portal: 
+- Documentation Portal: https://docs.google.com/document/d/1REY9ijR4JTb-zR2kKbUhVz10D6OddEY-mBI2g7idT10/edit?usp=sharing 
 
 ### Common Questions
 Q: Why do I need Ollama?
