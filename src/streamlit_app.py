@@ -7,7 +7,7 @@ st.set_page_config(page_title="ER Learning Assistant Pro", layout="wide")
 st.title("🎓 ER Learning Assistant Pro")
 
 # ==================== COURSE DATABASE ====================
-OURSE_DB = {
+COURSE_DB = {
     "biology": {
         "beginner": [
             "Cells are basic unit of life",
@@ -79,15 +79,6 @@ OURSE_DB = {
     }
 }
 
-try:
-    from educational_assistant import KnowledgeBase
-    kb = KnowledgeBase()
-    kb.load_courses()
-    COURSES_LOADED = True
-except Exception as e:
-    st.error(f"Course Error: {e}")
-    kb = None
-    COURSES_LOADED = False
 
 # ==================== OLLAMA CHECK ====================
 try:
@@ -101,21 +92,10 @@ try:
 except ImportError:
     OLLAMA_AVAILABLE = OLLAMA_RUNNING = False
 
-# ==================== FIX: GET COURSES FROM KNOWLEDGEBASE ====================
-if kb and hasattr(kb, 'courses'):
-    COURSE_DB = kb.courses
-elif kb and hasattr(kb, 'course_db'):
-    COURSE_DB = kb.course_db
-elif kb and hasattr(kb, 'documents'):
-    COURSE_DB = kb.documents
-elif kb and hasattr(kb, 'loaded_courses'):
-    COURSE_DB = kb.loaded_courses
-else:
-    COURSE_DB = []  # Fallback if no courses found
 
 # ==================== SIDEBAR ====================
 st.sidebar.header("⚙️ Settings")
-st.sidebar.write(f"**Courses:** {len(COURSE_DB)} subjects")
+st.sidebar.write(f"**Courses:** Biology, Computer Science")
 st.sidebar.write(f"**AI Status:** {'✅ Running' if OLLAMA_RUNNING else '❌ Not running'}")
 
 # ==================== TABS ====================
@@ -125,95 +105,106 @@ tab1, tab2, tab3, tab4 = st.tabs([
     "📄 PDF Summarizer Pro", 
     "🎯 Quiz Generator"
 ])
-
+# ==================== TAB 1: SMART COURSE SEARCH ====================
 # ==================== TAB 1: SMART COURSE SEARCH ====================
 with tab1:
-    st.subheader("🔍 Search Course Materials")
     st.subheader("🔍 Smart Course Search")
-
-    if not COURSES_LOADED:
-        st.warning("Course materials not loaded")
-    else:
-        question = st.text_input("Search in your courses:", key="search_q")
-        
-        col1, col2 = st.columns([3, 1])
-        with col1:
-            if st.button("🔎 Search Courses", use_container_width=True) and question:
-                with st.spinner("Searching..."):
-                    results = kb.search(question, max_results=5)
-                    if results:
-                        st.subheader(f"📚 Found {len(results)} matches:")
-                        for i, r in enumerate(results, 1):
-                            with st.expander(f"Match {i} (Relevance: {r['score']}/5)"):
-                                st.write(r['content'])
-                                st.caption(f"Source: {r['source']}")
-                    else:
-                        st.warning("No matches found.")
-        
-        with col2:
-            if st.button("📋 Show All Courses", use_container_width=True):
-                st.subheader("📚 All Available Courses:")
-                if kb.data:
-                    sources = set(r['source'] for r in kb.data)
-                    for source in sources:
-                        st.write(f"• {source}")
+    
+    # Use hardcoded course database
+    if 'course_data' not in st.session_state:
+        st.session_state.course_data = {
+            "biology": {
+                "beginner": [
+                    "Cells are the basic unit of life. All living organisms are composed of cells.",
+                    "Photosynthesis is the process where plants make food from sunlight, water and CO2.",
+                    "DNA (Deoxyribonucleic acid) carries genetic information in all living organisms.",
+                    "The human body has 206 bones that provide structure and protection.",
+                    "Plants need water, sunlight, and carbon dioxide to perform photosynthesis."
+                ],
+                "intermediate": [
+                    "Mitochondria are the powerhouses of the cell, producing ATP through cellular respiration.",
+                    "Enzymes are biological catalysts that speed up biochemical reactions.",
+                    "DNA replication is semi-conservative, each new DNA molecule has one original strand.",
+                    "The photosynthesis equation: 6CO2 + 6H2O → C6H12O6 + 6O2",
+                    "Meiosis produces gametes with half the chromosome number for sexual reproduction."
+                ],
+                "advanced": [
+                    "The Krebs cycle occurs in mitochondria and produces NADH and FADH2 for electron transport.",
+                    "Protein synthesis involves transcription (DNA to mRNA) and translation (mRNA to protein).",
+                    "CRISPR-Cas9 is a gene editing technology that allows precise DNA modifications.",
+                    "Epigenetics studies heritable phenotype changes without altering DNA sequence.",
+                    "Signal transduction pathways convert extracellular signals into cellular responses."
+                ]
+            },
+            "computer_science": {
+                "beginner": [
+                    "Python uses indentation (whitespace) to define code blocks instead of braces.",
+                    "HTML (Hypertext Markup Language) creates the structure of webpages.",
+                    "Variables store data values in computer memory for later use.",
+                    "Functions are reusable blocks of code that perform specific tasks.",
+                    "Loops (for, while) allow code to repeat multiple times efficiently."
+                ],
+                "intermediate": [
+                    "Object-oriented programming (OOP) uses classes and objects to organize code.",
+                    "SQL (Structured Query Language) is used to query and manage database tables.",
+                    "APIs (Application Programming Interfaces) allow different software applications to communicate.",
+                    "Common data structures include lists, dictionaries, stacks, and queues.",
+                    "Version control systems like Git track changes in code over time."
+                ],
+                "advanced": [
+                    "Machine learning algorithms learn patterns from data to make predictions.",
+                    "Neural networks are computing systems inspired by biological brain structure.",
+                    "Cloud computing delivers computing services over the internet on demand.",
+                    "Cybersecurity protects computer systems from theft, damage, or disruption.",
+                    "Blockchain is a distributed ledger technology that enables secure, transparent transactions."
+                ]
+            }
+        }
+    
+    # Subject and level selection
     col1, col2 = st.columns(2)
     with col1:
-        course = st.selectbox(
-            "Select Course:",
-            ["Biology", "Computer Science", "Physics"],
-            key="search_course"
-        ).lower().replace(" ", "_")
-    
+        subject = st.selectbox("📚 Select Subject:", ["biology", "computer_science"], 
+                              format_func=lambda x: x.title())
     with col2:
-        level = st.selectbox(
-            "Difficulty Level:",
-            ["Beginner", "Intermediate", "Advanced"],
-            key="search_level"
-        ).lower()
+        level = st.selectbox("🎯 Select Level:", ["beginner", "intermediate", "advanced"],
+                            format_func=lambda x: x.title())
     
-    search_query = st.text_input(
-        "🔎 Search Topic:", 
-        placeholder="Enter topic (e.g., cells, functions, energy)..."
-    )
+    # Get topics for selected subject and level
+    topics = st.session_state.course_data[subject][level]
     
-    if st.button("🔍 Search", type="primary") and search_query:
-        if course in COURSE_DB and level in COURSE_DB[course]:
-            results = []
-            for content in COURSE_DB[course][level]:
-                if search_query.lower() in content.lower():
-                    results.append(content)
-            
-            if results:
-                st.success(f"✅ Found {len(results)} results:")
-                for i, result in enumerate(results, 1):
-                    with st.expander(f"📖 Result {i}: {result[:50]}..."):
-                        st.write(f"**Content:** {result}")
-                        st.write(f"**Course:** {course.replace('_', ' ').title()}")
-                        st.write(f"**Level:** {level.title()}")
-                        
-                        # AI explanation option
-                        if OLLAMA_RUNNING and st.button(f"🤖 Explain this", key=f"explain_{i}"):
-                            with st.spinner("Getting AI explanation..."):
-                                try:
-                                    ai_response = ollama.generate(
-                                        model="gemma:2b",
-                                        prompt=f"Explain this concept simply: {result}",
-                                        options={'num_predict': 300}
-                                    )
-                                    st.info(f"**AI Explanation:** {ai_response['response']}")
-                                except:
-                                    st.warning("AI explanation unavailable")
-            else:
-                st.info("No exact matches. Try different keywords or check other levels.")
+    # Search box
+    search_query = st.text_input("🔍 Search topics:", 
+                                placeholder=f"Search in {subject.title()} - {level.title()}...")
     
-    # Browse all content
+    # Filter topics based on search
+    if search_query:
+        filtered_topics = [topic for topic in topics if search_query.lower() in topic.lower()]
+    else:
+        filtered_topics = topics
+    
+    # Display results
     st.markdown("---")
-    st.subheader("📚 Browse Course Content")
-    if course in COURSE_DB and level in COURSE_DB[course]:
-        for i, content in enumerate(COURSE_DB[course][level], 1):
-            st.write(f"{i}. {content}")
-
+    
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        if search_query:
+            st.subheader(f"📋 Search Results: {len(filtered_topics)} matches")
+        else:
+            st.subheader(f"📋 All Topics: {len(filtered_topics)} topics")
+    with col2:
+        st.info(f"📚 {subject.title()} - {level.title()}")
+    
+    # Show topics with expanders
+    if filtered_topics:
+        for i, topic in enumerate(filtered_topics, 1):
+            with st.expander(f"📖 Topic {i}: {topic[:60]}..."):
+                st.markdown(f"**Complete Content:**")
+                st.write(topic)
+                st.caption(f"📌 Subject: {subject.title()} | Level: {level.title()}")
+    else:
+        st.warning("⚠️ No matching topics found. Try different keywords.")
+        st.info("💡 Suggestions: Try 'cell', 'DNA', 'Python', 'algorithm'")
 # ==================== TAB 2: AI TUTOR ====================
 with tab2:
     st.subheader("🤖 AI Tutor")
@@ -239,7 +230,7 @@ with tab2:
             style = st.selectbox(
                 "Answer Style:",
                 ["Simple", "Detailed", "Technical", "With Examples"]
-            )
+             )
         
         if st.button("🧠 Get AI Answer", type="primary") and question:
             with st.spinner(f"Thinking in {style.lower()} style..."):
